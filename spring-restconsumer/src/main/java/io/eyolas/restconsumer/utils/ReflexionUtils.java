@@ -45,7 +45,6 @@ public class ReflexionUtils {
             int i = 0;
             for (Annotation[] pAnnotations : parameterAnnotations) {
                 Class parameterType = parameterTypes[i];
-                
 
                 if (null == pAnnotations || pAnnotations.length == 0) {
                     throw new ParameterAnnotationException("Parameter must have query annotation");
@@ -81,15 +80,21 @@ public class ReflexionUtils {
 
     public static boolean hasQueryAnnotation(List<Annotation> annotations) {
         for (Annotation annotation : annotations) {
-            if (isAssignableFrom(annotation, Path.class) || isAssignableFrom(annotation, Query.class) || isAssignableFrom(annotation, QueryMap.class)) {
+            if (isAssignableFrom(annotation, Path.class, Query.class, QueryMap.class)) {
                 return true;
             }
         }
 
         return false;
     }
-    
-    public static boolean isAssignableFrom(Annotation annotation, Class annotationType) {
-        return annotation.annotationType().isAssignableFrom(annotationType);
+
+    public static boolean isAssignableFrom(Annotation annotation, Class... annotationTypes) {
+        for (Class annotationType : annotationTypes) {
+            if (annotation.annotationType().isAssignableFrom(annotationType)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

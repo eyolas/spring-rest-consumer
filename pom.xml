@@ -24,7 +24,7 @@
     <developers>
         <developer>
             <name>David Touzet</name>
-            <email>dtouzet@sword-group.com</email>
+            <email>dtouzet@gmail.com</email>
         </developer>
     </developers>
 
@@ -54,6 +54,12 @@
                 <groupId>io.eyolas.http</groupId>
                 <artifactId>uri-query-builder</artifactId>
                 <version>0.0.1</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>0.9.9</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

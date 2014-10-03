@@ -94,6 +94,11 @@
             <groupId>io.eyolas.http</groupId>
             <artifactId>uri-query-builder</artifactId>
         </dependency>
+        
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

@@ -10,6 +10,8 @@ import io.eyolas.restconsumer.reflexion.ParamReflexionInfo;
 import io.eyolas.restconsumer.utils.ReflexionUtils;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.eyolas.restconsumer.query.QueryType;
+import io.eyolas.restconsumer.reflexion.MethodInfo;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -17,11 +19,14 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import org.reflections.ReflectionUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -54,6 +59,7 @@ public class RestBuilder {
 
         private final ClassReflexionInfo classReflexionInfo;
         private final RestEntityManager restEntityManager;
+        private final Map<Method, MethodInfo> cache = new HashMap<>();
 
         public RestHandler(ClassReflexionInfo classReflexionInfo, RestEntityManager restEntityManager) {
             this.classReflexionInfo = classReflexionInfo;
@@ -66,60 +72,80 @@ public class RestBuilder {
             if (method.getDeclaringClass() == Object.class) {
                 return method.invoke(this, args);
             }
-            
-            
-            MethodReflexionInfo methodReflexionInfo = classReflexionInfo.getMethodReflexionInfos().get(method);
-
-            Entry<RestMethod, String> infoMethodHttp = getInfoMethod(methodReflexionInfo);
-
-            HttpMethod httpMethod = HttpMethod.GET;
-            String uri = "";
-            if (null != infoMethodHttp) {
-                httpMethod = infoMethodHttp.getKey().value();
-                uri = infoMethodHttp.getValue();
-            }
 
             Map<String, Object> params = new HashMap<>();
             Map<String, Object> pathVariables = new HashMap<>();
+            MethodInfo methodInfo = cache.get(method);
 
-            int i = 0;
-            for (ParamReflexionInfo parameter : methodReflexionInfo.getParams()) {
+            if (null == methodInfo) {
+                methodInfo = new MethodInfo();
+                MethodReflexionInfo methodReflexionInfo = classReflexionInfo.getMethodReflexionInfos().get(method);
 
-                for (Annotation annotation : parameter.getAnnotations()) {
-                    String key = (String) AnnotationUtils.getValue(annotation);
-                    if (ReflexionUtils.isAssignableFrom(annotation, Path.class)) {
-                        pathVariables.put(key, args[i]);
-                    } else if (ReflexionUtils.isAssignableFrom(annotation, Query.class)) {
-                        params.put(key, args[i]);
-                    } else if (ReflexionUtils.isAssignableFrom(annotation, QueryMap.class)) {
-                        params.putAll((Map<? extends String, ? extends Object>) args[i]);
+                Entry<RestMethod, String> infoMethodHttp = getInfoMethod(methodReflexionInfo);
+
+                HttpMethod httpMethod = HttpMethod.GET;
+                String uri = "";
+                if (null != infoMethodHttp) {
+                    httpMethod = infoMethodHttp.getKey().value();
+                    uri = infoMethodHttp.getValue();
+                }
+                methodInfo.setUri(uri);
+                methodInfo.setHttpMethod(httpMethod);
+
+                List<Entry<String, QueryType>> paramsMatch = new ArrayList<>();
+                int i = 0;
+                for (ParamReflexionInfo parameter : methodReflexionInfo.getParams()) {
+                    Entry<String, QueryType> ent = null;
+                    for (Annotation annotation : parameter.getAnnotations()) {
+                        if (ReflexionUtils.isAssignableFrom(annotation, Path.class, Query.class, QueryMap.class)) {
+                            String key = (String) AnnotationUtils.getValue(annotation);
+                            QueryType value;
+                            if (ReflexionUtils.isAssignableFrom(annotation, Path.class)) {
+                                value = QueryType.PATH;
+                            } else {
+                                value = QueryType.PARAM;
+                            }
+                            ent = new AbstractMap.SimpleEntry(key, value);
+                            break;
+                        }
+
+                    }
+                    paramsMatch.add(ent);
+                    i++;
+                }
+
+                JavaType returnType = getType(method, restEntityManager.getObjectMapper());
+                methodInfo.setParamsMatch(paramsMatch);
+                methodInfo.setReturnType(returnType);
+                cache.put(method, methodInfo);
+            }
+            for (int i = 0; i < args.length; i++) {
+                Entry<String, QueryType> paramInfo = methodInfo.getParamsMatch().get(i);
+                if (null != paramInfo) {
+                    Object argument = args[i];
+                    switch (paramInfo.getValue()) {
+                        case PARAM:
+                            if (argument instanceof Map) {
+                                params.putAll((Map<? extends String, ? extends Object>) argument);
+                            } else {
+                                params.put(paramInfo.getKey(), argument);
+                            }
+                        case PATH:
+                            pathVariables.put(paramInfo.getKey(), argument);
                     }
                 }
 
-                i++;
             }
-            method.getReturnType().getDeclaredFields();
-            Class returnClass = method.getReturnType();
-            if (Collection.class.isAssignableFrom(returnClass)) {
-                Type returnType = method.getGenericReturnType();
-                if (returnType instanceof ParameterizedType) {
-                    ParameterizedType paramType = (ParameterizedType) returnType;
-                    Type[] argTypes = paramType.getActualTypeArguments();
-                    if (argTypes.length > 0) {
-                        System.out.println("Generic type is " + argTypes[0]);
-                    }
-                }
-            }
-            
-            return restEntityManager.call(httpMethod, uri, params, pathVariables, getType(method, restEntityManager.getObjectMapper()));
+
+            return restEntityManager.call(methodInfo.getHttpMethod(), methodInfo.getUri(), params, pathVariables, methodInfo.getReturnType());
         }
-        
+
         /**
          * Return jackson javaType
-         * 
+         *
          * @param method
          * @param objectMapper
-         * @return 
+         * @return
          */
         private JavaType getType(Method method, ObjectMapper objectMapper) {
             Class returnClass = method.getReturnType();
@@ -132,7 +158,7 @@ public class RestBuilder {
                         return objectMapper.getTypeFactory().constructCollectionType(returnClass, (Class) argTypes[0]);
                     }
                 }
-                return null;
+                throw new IllegalArgumentException("Method " + method.getName() + " has unknown return type");
             } else {
                 return objectMapper.getTypeFactory().constructType(method.getGenericReturnType());
             }
@@ -140,6 +166,7 @@ public class RestBuilder {
 
         /**
          * Get information of method
+         *
          * @param methodReflexionInfo
          * @return entry
          */
