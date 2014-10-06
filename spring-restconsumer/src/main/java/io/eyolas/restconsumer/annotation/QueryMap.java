@@ -1,4 +1,4 @@
-package io.eyolas.restconsumer.query;
+package io.eyolas.restconsumer.annotation;
 
 import java.lang.annotation.Documented;
 import static java.lang.annotation.ElementType.PARAMETER;
@@ -13,6 +13,5 @@ import java.lang.annotation.Target;
 @Documented
 @Target(PARAMETER)
 @Retention(RUNTIME)
-public @interface Query {
-  String value();
+public @interface QueryMap {
 }

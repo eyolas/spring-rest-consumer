@@ -1,17 +1,17 @@
 package io.eyolas.restconsumer.rest;
 
 import io.eyolas.restconsumer.exception.ParameterAnnotationException;
-import io.eyolas.restconsumer.query.Path;
-import io.eyolas.restconsumer.query.Query;
-import io.eyolas.restconsumer.query.QueryMap;
-import io.eyolas.restconsumer.reflexion.ClassReflexionInfo;
-import io.eyolas.restconsumer.reflexion.MethodReflexionInfo;
-import io.eyolas.restconsumer.reflexion.ParamReflexionInfo;
-import io.eyolas.restconsumer.utils.ReflexionUtils;
+import io.eyolas.restconsumer.annotation.Path;
+import io.eyolas.restconsumer.annotation.Query;
+import io.eyolas.restconsumer.annotation.QueryMap;
+import io.eyolas.restconsumer.reflect.ClassReflectionInfo;
+import io.eyolas.restconsumer.reflect.MethodReflectionInfo;
+import io.eyolas.restconsumer.reflect.ParamReflectionInfo;
+import io.eyolas.restconsumer.reflect.utils.ReflectionUtils;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.eyolas.restconsumer.query.QueryType;
-import io.eyolas.restconsumer.reflexion.MethodInfo;
+import io.eyolas.restconsumer.annotation.QueryType;
+import io.eyolas.restconsumer.reflect.MethodInfo;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import org.reflections.ReflectionUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -52,16 +50,16 @@ public class RestBuilder {
         Assert.isTrue(service.isInterface(), "service must be an interface");
 
         return (T) Proxy.newProxyInstance(service.getClassLoader(), new Class<?>[]{service},
-                new RestHandler(ReflexionUtils.extractAnnotation(service), restEntityManager));
+                new RestHandler(ReflectionUtils.extractAnnotation(service), restEntityManager));
     }
 
     private class RestHandler implements InvocationHandler {
 
-        private final ClassReflexionInfo classReflexionInfo;
+        private final ClassReflectionInfo classReflexionInfo;
         private final RestEntityManager restEntityManager;
         private final Map<Method, MethodInfo> cache = new HashMap<>();
 
-        public RestHandler(ClassReflexionInfo classReflexionInfo, RestEntityManager restEntityManager) {
+        public RestHandler(ClassReflectionInfo classReflexionInfo, RestEntityManager restEntityManager) {
             this.classReflexionInfo = classReflexionInfo;
             this.restEntityManager = restEntityManager;
         }
@@ -79,7 +77,7 @@ public class RestBuilder {
 
             if (null == methodInfo) {
                 methodInfo = new MethodInfo();
-                MethodReflexionInfo methodReflexionInfo = classReflexionInfo.getMethodReflexionInfos().get(method);
+                MethodReflectionInfo methodReflexionInfo = classReflexionInfo.getMethodReflexionInfos().get(method);
 
                 Entry<RestMethod, String> infoMethodHttp = getInfoMethod(methodReflexionInfo);
 
@@ -94,13 +92,13 @@ public class RestBuilder {
 
                 List<Entry<String, QueryType>> paramsMatch = new ArrayList<>();
                 int i = 0;
-                for (ParamReflexionInfo parameter : methodReflexionInfo.getParams()) {
+                for (ParamReflectionInfo parameter : methodReflexionInfo.getParams()) {
                     Entry<String, QueryType> ent = null;
                     for (Annotation annotation : parameter.getAnnotations()) {
-                        if (ReflexionUtils.isAssignableFrom(annotation, Path.class, Query.class, QueryMap.class)) {
+                        if (ReflectionUtils.isAssignableFrom(annotation, Path.class, Query.class, QueryMap.class)) {
                             String key = (String) AnnotationUtils.getValue(annotation);
                             QueryType value;
-                            if (ReflexionUtils.isAssignableFrom(annotation, Path.class)) {
+                            if (ReflectionUtils.isAssignableFrom(annotation, Path.class)) {
                                 value = QueryType.PATH;
                             } else {
                                 value = QueryType.PARAM;
@@ -170,7 +168,7 @@ public class RestBuilder {
          * @param methodReflexionInfo
          * @return entry
          */
-        private Entry<RestMethod, String> getInfoMethod(MethodReflexionInfo methodReflexionInfo) {
+        private Entry<RestMethod, String> getInfoMethod(MethodReflectionInfo methodReflexionInfo) {
             List<Annotation> annotations = methodReflexionInfo.getAnnotations();
             for (Annotation annotation : annotations) {
                 RestMethod restMethod = AnnotationUtils.findAnnotation(annotation.getClass(), RestMethod.class);

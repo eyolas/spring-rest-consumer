@@ -1,4 +1,4 @@
-package io.eyolas.restconsumer.reflexion;
+package io.eyolas.restconsumer.reflect;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -11,7 +11,7 @@ import lombok.experimental.Builder;
  */
 @Builder
 @Data
-public class ParamReflexionInfo {
+public class ParamReflectionInfo {
     private Class parameterType;
     
     private List<Annotation> annotations;

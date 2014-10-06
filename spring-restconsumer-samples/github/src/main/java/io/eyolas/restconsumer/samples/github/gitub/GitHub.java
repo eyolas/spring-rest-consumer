@@ -1,7 +1,7 @@
 package io.eyolas.restconsumer.samples.github.gitub;
 
-import io.eyolas.restconsumer.http.GET;
-import io.eyolas.restconsumer.query.Path;
+import io.eyolas.restconsumer.annotation.GET;
+import io.eyolas.restconsumer.annotation.Path;
 import java.util.List;
 
 /**

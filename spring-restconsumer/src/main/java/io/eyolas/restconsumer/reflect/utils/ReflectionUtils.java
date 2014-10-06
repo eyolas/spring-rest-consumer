@@ -1,12 +1,12 @@
-package io.eyolas.restconsumer.utils;
+package io.eyolas.restconsumer.reflect.utils;
 
 import io.eyolas.restconsumer.exception.ParameterAnnotationException;
-import io.eyolas.restconsumer.query.Path;
-import io.eyolas.restconsumer.query.Query;
-import io.eyolas.restconsumer.query.QueryMap;
-import io.eyolas.restconsumer.reflexion.ClassReflexionInfo;
-import io.eyolas.restconsumer.reflexion.MethodReflexionInfo;
-import io.eyolas.restconsumer.reflexion.ParamReflexionInfo;
+import io.eyolas.restconsumer.annotation.Path;
+import io.eyolas.restconsumer.annotation.Query;
+import io.eyolas.restconsumer.annotation.QueryMap;
+import io.eyolas.restconsumer.reflect.ClassReflectionInfo;
+import io.eyolas.restconsumer.reflect.MethodReflectionInfo;
+import io.eyolas.restconsumer.reflect.ParamReflectionInfo;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -18,7 +18,7 @@ import java.util.Map;
  *
  * @author eyolas
  */
-public class ReflexionUtils {
+public class ReflectionUtils {
 
     /**
      * Extract annotation
@@ -26,11 +26,11 @@ public class ReflexionUtils {
      * @param clazz
      * @return ClassReflexionInfo
      */
-    public static ClassReflexionInfo extractAnnotation(Class clazz) throws ParameterAnnotationException {
-        Map<Method, MethodReflexionInfo> methodReflexionInfos = new HashMap<>();
+    public static ClassReflectionInfo extractAnnotation(Class clazz) throws ParameterAnnotationException {
+        Map<Method, MethodReflectionInfo> methodReflexionInfos = new HashMap<>();
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
-            MethodReflexionInfo info = new MethodReflexionInfo(method);
+            MethodReflectionInfo info = new MethodReflectionInfo(method);
 
             //extract method annotations
             Annotation[] mAnnotations = method.getAnnotations();
@@ -61,7 +61,7 @@ public class ReflexionUtils {
                     }
                 }
 
-                info.getParams().add(ParamReflexionInfo.builder()
+                info.getParams().add(ParamReflectionInfo.builder()
                         .annotations(anno)
                         .parameterType(parameterType)
                         .build());
@@ -72,7 +72,7 @@ public class ReflexionUtils {
             methodReflexionInfos.put(method, info);
         }
 
-        return ClassReflexionInfo.builder()
+        return ClassReflectionInfo.builder()
                 .clazz(clazz)
                 .methodReflexionInfos(methodReflexionInfos)
                 .build();

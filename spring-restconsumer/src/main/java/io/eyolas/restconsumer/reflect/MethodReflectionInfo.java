@@ -1,4 +1,4 @@
-package io.eyolas.restconsumer.reflexion;
+package io.eyolas.restconsumer.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -11,14 +11,14 @@ import lombok.Data;
  * @author eyolas
  */
 @Data
-public class MethodReflexionInfo {
+public class MethodReflectionInfo {
     private Method method;
     
     private List<Annotation> annotations = new ArrayList<>();
     
-    private List<ParamReflexionInfo> params = new ArrayList<>();
+    private List<ParamReflectionInfo> params = new ArrayList<>();
 
-    public MethodReflexionInfo(Method method) {
+    public MethodReflectionInfo(Method method) {
         this.method = method;
     }
     

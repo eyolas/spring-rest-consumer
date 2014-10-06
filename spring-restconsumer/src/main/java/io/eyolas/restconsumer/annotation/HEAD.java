@@ -1,4 +1,4 @@
-package io.eyolas.restconsumer.http;
+package io.eyolas.restconsumer.annotation;
 
 import io.eyolas.restconsumer.rest.RestMethod;
 import java.lang.annotation.Documented;

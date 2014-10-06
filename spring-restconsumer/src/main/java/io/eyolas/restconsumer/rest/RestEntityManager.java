@@ -35,6 +35,12 @@ public class RestEntityManager {
         this.restTemplate = restTemplate;
         this.endPoint = endPoint;
     }
+    
+    public RestEntityManager(String endPoint) {
+        Assert.notNull(endPoint, "endPoint is mandatory");
+        this.restTemplate = new RestTemplate();
+        this.endPoint = endPoint;
+    }
 
     /**
      * <p>
@@ -97,9 +103,4 @@ public class RestEntityManager {
 
         return null;
     }
-    
-    
-//    private JavaType getType() {
-//        
-//    }
 }

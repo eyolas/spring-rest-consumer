@@ -1,7 +1,7 @@
-package io.eyolas.restconsumer.reflexion;
+package io.eyolas.restconsumer.reflect;
 
 import com.fasterxml.jackson.databind.JavaType;
-import io.eyolas.restconsumer.query.QueryType;
+import io.eyolas.restconsumer.annotation.QueryType;
 import java.util.List;
 import java.util.Map;
 import lombok.Data;

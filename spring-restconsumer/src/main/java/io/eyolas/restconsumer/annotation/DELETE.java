@@ -1,4 +1,4 @@
-package io.eyolas.restconsumer.http;
+package io.eyolas.restconsumer.annotation;
 
 import io.eyolas.restconsumer.rest.RestMethod;
 import java.lang.annotation.Documented;
@@ -15,7 +15,7 @@ import org.springframework.http.HttpMethod;
 @Documented
 @Target(METHOD)
 @Retention(RUNTIME)
-@RestMethod(HttpMethod.GET)
-public @interface GET {
-    String value();
+@RestMethod(HttpMethod.DELETE)
+public @interface DELETE {
+  String value();
 }

@@ -7,8 +7,8 @@
 package io.eyolas.restconsumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.eyolas.restconsumer.http.GET;
-import io.eyolas.restconsumer.query.Path;
+import io.eyolas.restconsumer.annotation.GET;
+import io.eyolas.restconsumer.annotation.Path;
 import io.eyolas.restconsumer.rest.RestBuilder;
 import io.eyolas.restconsumer.rest.RestEntityManager;
 import java.util.List;

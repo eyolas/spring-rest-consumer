@@ -1,4 +1,4 @@
-package io.eyolas.restconsumer.reflexion;
+package io.eyolas.restconsumer.reflect;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -12,9 +12,9 @@ import lombok.experimental.Builder;
  */
 @Builder
 @Data
-public class ClassReflexionInfo {
+public class ClassReflectionInfo {
 
     private final Class clazz;
 
-    private Map<Method, MethodReflexionInfo> methodReflexionInfos = new HashMap<>();
+    private Map<Method, MethodReflectionInfo> methodReflexionInfos = new HashMap<>();
 }

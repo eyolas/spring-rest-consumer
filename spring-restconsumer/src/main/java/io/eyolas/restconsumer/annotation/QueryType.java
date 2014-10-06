@@ -1,4 +1,4 @@
-package io.eyolas.restconsumer.query;
+package io.eyolas.restconsumer.annotation;
 
 /**
  *
