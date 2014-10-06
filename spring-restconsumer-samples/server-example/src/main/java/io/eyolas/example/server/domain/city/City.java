@@ -5,7 +5,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.validation.constraints.Size;
 import lombok.Data;
 
 /**
@@ -23,15 +22,25 @@ public class City implements Serializable {
     private Long id;
 
     @Column(nullable = false)
-    @Size(min = 3)
     private String name;
 
     @Column(nullable = false)
     private String state;
 
-    @Column(nullable = false)
+    @Column
     private String country;
 
     @Column(nullable = false)
     private String map;
+
+    public City() {
+    }
+
+    public City(String name, String state, String country, String map) {
+        this.name = name;
+        this.state = state;
+        this.country = country;
+        this.map = map;
+    }
+
 }

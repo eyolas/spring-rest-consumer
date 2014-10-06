@@ -8,7 +8,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import lombok.Data;
-import org.hibernate.annotations.NaturalId;
 
 /**
  *
@@ -24,11 +23,18 @@ public class Stadium implements Serializable {
     @GeneratedValue
     private Long id;
 
-    @ManyToOne(optional = false)
-    @NaturalId
+    @ManyToOne
     private City city;
 
     @Column
     private String name;
+
+    public Stadium() {
+    }
+
+    public Stadium(City city, String name) {
+        this.city = city;
+        this.name = name;
+    }
 
 }
