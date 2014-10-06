@@ -1,4 +1,4 @@
-package io.eyolas.restconsumer.rest;
+package io.eyolas.restconsumer.annotation;
 
 import static java.lang.annotation.ElementType.TYPE;
 import java.lang.annotation.Retention;

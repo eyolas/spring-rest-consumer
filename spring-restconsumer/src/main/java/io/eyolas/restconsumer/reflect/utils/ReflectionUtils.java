@@ -1,5 +1,7 @@
 package io.eyolas.restconsumer.reflect.utils;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.eyolas.restconsumer.exception.ParameterAnnotationException;
 import io.eyolas.restconsumer.annotation.Path;
 import io.eyolas.restconsumer.annotation.Query;
@@ -7,12 +9,19 @@ import io.eyolas.restconsumer.annotation.QueryMap;
 import io.eyolas.restconsumer.reflect.ClassReflectionInfo;
 import io.eyolas.restconsumer.reflect.MethodReflectionInfo;
 import io.eyolas.restconsumer.reflect.ParamReflectionInfo;
+import io.eyolas.restconsumer.rest.RestMethod;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  *
@@ -96,5 +105,48 @@ public class ReflectionUtils {
         }
 
         return false;
+    }
+
+    /**
+     * Return jackson javaType
+     *
+     * @param method
+     * @param objectMapper
+     * @return
+     */
+    public static JavaType getType(Method method, ObjectMapper objectMapper) {
+        Class returnClass = method.getReturnType();
+        if (Collection.class.isAssignableFrom(returnClass)) {
+            Type returnType = method.getGenericReturnType();
+            if (returnType instanceof ParameterizedType) {
+                ParameterizedType paramType = (ParameterizedType) returnType;
+                Type[] argTypes = paramType.getActualTypeArguments();
+                if (argTypes.length > 0) {
+                    return objectMapper.getTypeFactory().constructCollectionType(returnClass, (Class) argTypes[0]);
+                }
+            }
+            throw new IllegalArgumentException("Method " + method.getName() + " has unknown return type");
+        } else {
+            return objectMapper.getTypeFactory().constructType(method.getGenericReturnType());
+        }
+    }
+
+    /**
+     * Get information of method
+     *
+     * @param methodReflexionInfo
+     * @return entry
+     */
+    public static Map.Entry getHttpMethodInfo(MethodReflectionInfo methodReflexionInfo) {
+        List<Annotation> annotations = methodReflexionInfo.getAnnotations();
+        if (!CollectionUtils.isEmpty(annotations)) {
+            for (Annotation annotation : annotations) {
+                RestMethod restMethod = AnnotationUtils.findAnnotation(annotation.getClass(), RestMethod.class);
+                if (null != restMethod && null != restMethod.value()) {
+                    return new AbstractMap.SimpleEntry(restMethod, (String) AnnotationUtils.getValue(annotation));
+                }
+            }
+        }
+        return null;
     }
 }
