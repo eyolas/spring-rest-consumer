@@ -10,7 +10,6 @@ import io.eyolas.restconsumer.reflect.ParamReflectionInfo;
 import io.eyolas.restconsumer.reflect.utils.ReflectionUtils;
 import com.fasterxml.jackson.databind.JavaType;
 import io.eyolas.restconsumer.annotation.QueryType;
-import io.eyolas.restconsumer.reflect.MethodInfo;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

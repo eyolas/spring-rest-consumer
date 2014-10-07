@@ -1,4 +1,4 @@
-package io.eyolas.restconsumer.reflect;
+package io.eyolas.restconsumer.rest;
 
 import com.fasterxml.jackson.databind.JavaType;
 import io.eyolas.restconsumer.annotation.QueryType;
