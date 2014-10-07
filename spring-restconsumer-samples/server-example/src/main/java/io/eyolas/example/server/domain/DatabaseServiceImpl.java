@@ -6,12 +6,14 @@ import io.eyolas.example.server.domain.stadium.Stadium;
 import io.eyolas.example.server.domain.stadium.StadiumRepository;
 import javax.annotation.Resource;
 import javax.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
  *
  * @author dtouzet
  */
+@Slf4j
 @Service
 public class DatabaseServiceImpl implements DatabaseService{
     @Resource
@@ -23,9 +25,11 @@ public class DatabaseServiceImpl implements DatabaseService{
     @Transactional
     @Override
     public void initDatabase() {
+        log.info("Delete all data");
         cityRepository.deleteAll();
         stadiumRepository.deleteAll();
         
+        log.info("Begin create data");
         //Brisbane
         City city = new City("Australia", "Brisbane", "Queensland", "-27.470933, 153.023502");
         city = cityRepository.save(city);
@@ -116,6 +120,6 @@ public class DatabaseServiceImpl implements DatabaseService{
         city = cityRepository.save(city);
         stadium = new Stadium(city, "Chicago Stadium");
         stadiumRepository.save(stadium);
-        
+        log.info("End create data");
     }
 }
